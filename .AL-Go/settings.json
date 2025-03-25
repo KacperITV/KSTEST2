@@ -5,8 +5,5 @@
   "testFolders": [],
   "bcptTestFolders": [],
   "environments": ["TestNewPLF"],
-  "buildModes": ["Default"],
-  "applicationVersion": "22.0",
-  "applicationInsightsConnectionString": "",
-  "runs-on": "windows-latest"
+  "RepoVersion": "2.0"
 }
