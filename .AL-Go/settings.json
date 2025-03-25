@@ -1,6 +1,9 @@
 {
+  "type": "PTE",
   "country": "us",
-  "appFolders": [],
+  "appFolders": ["KSTEST2"],
   "testFolders": [],
-  "bcptTestFolders": []
+  "bcptTestFolders": [],
+  "environments": ["TestNewPLF"],
+  "RepoVersion": "2.0"
 }
