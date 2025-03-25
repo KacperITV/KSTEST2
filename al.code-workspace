@@ -4,6 +4,9 @@
       "path": "KSTEST2"
     },
     {
+      "path": "KSTEST2CDT.Test"
+    },
+    {
       "path": ".AL-Go"
     }
   ],
