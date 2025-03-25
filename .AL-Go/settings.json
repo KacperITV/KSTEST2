@@ -1,8 +1,12 @@
 {
+  "type": "PTE",
   "country": "us",
   "appFolders": ["KSTEST2"],
   "testFolders": [],
   "bcptTestFolders": [],
-  "environments": ["TestNewPLF"]
-  
+  "environments": ["TestNewPLF"],
+  "buildModes": ["Default"],
+  "applicationVersion": "22.0",
+  "applicationInsightsConnectionString": "",
+  "runs-on": "windows-latest"
 }
