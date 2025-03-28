@@ -142,11 +142,13 @@ jobs:
           project: ${{ inputs.project }}
 
       - name: Cache Business Central Artifacts
-        if: steps.DetermineBuildProject.outputs.BuildIt == 'True' && env.useCompilerFolder == 'True' && inputs.useArtifactCache && env.artifactCacheKey
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
+        if: steps.DetermineBuildProject.outputs.BuildIt == 'True' && env.useCompilerFolder == 'True'
+        uses: actions/cache@v4  # Zaktualizuj wersję cache
         with:
           path: .artifactcache
-          key: ${{ env.artifactCacheKey }}
+          key: ${{ runner.os }}-bc-artifacts-${{ hashFiles('**/*.app') }}
+          restore-keys: |
+            ${{ runner.os }}-bc-artifacts-
 
       - name: Download Project Dependencies
         id: DownloadProjectDependencies
