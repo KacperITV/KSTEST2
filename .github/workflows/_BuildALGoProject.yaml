@@ -73,6 +73,10 @@ on:
         description: Flag determining whether to use the Artifacts Cache
         type: boolean
         default: false
+      incrementalBuild:
+        description: Flag determining whether to use incremental build
+        type: boolean
+        default: false
 
 permissions:
   actions: read
@@ -136,14 +140,32 @@ jobs:
 
       - name: Cache Business Central Artifacts
         id: cache-bc-artifacts
-        if: steps.DetermineBuildProject.outputs.BuildIt == 'True' && env.useCompilerFolder == 'True' && inputs.useArtifactCache
+        if: steps.DetermineBuildProject.outputs.BuildIt == 'True' && env.useCompilerFolder == 'True'
         uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
         with:
-          path: .artifactcache
-          key: bc-artifacts-${{ runner.os }}-${{ inputs.project }}-${{ hashFiles(format('{0}/**/app.json', inputs.project)) }}
+          path: |
+            .buildartifacts
+            .artifactcache
+          key: bc-artifacts-${{ inputs.project }}-${{ hashFiles(format('{0}/**/app.json', inputs.project)) }}
           restore-keys: |
-            bc-artifacts-${{ runner.os }}-${{ inputs.project }}-
+            bc-artifacts-${{ inputs.project }}-
 
+      - name: Check if build artifacts are cached
+        id: check-build-cache
+        if: steps.cache-bc-artifacts.outputs.cache-hit == 'true'
+        run: |
+          Write-Host "Znaleziono zbuforowane artefakty - przygotowanie do użycia"
+    
+          # Sprawdź czy artefakty są aktualne i kompletne
+          $artifactsPath = "${{ inputs.project }}/.buildartifacts/Apps"
+          if (Test-Path -Path $artifactsPath) {
+          Write-Host "Znaleziono wcześniejsze artefakty w cache"
+          Add-Content -Encoding UTF8 -Path $env:GITHUB_OUTPUT -Value "cache-usable=true"
+          } else {
+            Write-Host "Cache istnieje, ale nie zawiera oczekiwanych artefaktów"
+          Add-Content -Encoding UTF8 -Path $env:GITHUB_OUTPUT -Value "cache-usable=false"
+          }
+            
       - name: Cache Diagnostic
         if: steps.DetermineBuildProject.outputs.BuildIt == 'True' && env.useCompilerFolder == 'True' && inputs.useArtifactCache
         run: |
@@ -169,7 +191,7 @@ jobs:
 
       - name: Build
         uses: microsoft/AL-Go-Actions/RunPipeline@v6.4
-        if: steps.DetermineBuildProject.outputs.BuildIt == 'True'
+        if: steps.DetermineBuildProject.outputs.BuildIt == 'True' && (steps.check-build-cache.outputs.cache-usable != 'true')
         env:
           Secrets: '${{ steps.ReadSecrets.outputs.Secrets }}'
           BuildMode: ${{ inputs.buildMode }}
@@ -182,6 +204,8 @@ jobs:
           installTestAppsJson: ${{ steps.DownloadProjectDependencies.outputs.DownloadedTestApps }}
           baselineWorkflowRunId: ${{ inputs.baselineWorkflowRunId }}
           baselineWorkflowSHA: ${{ inputs.baselineWorkflowSHA }}
+          incrementalBuild: true
+          
 
       - name: Sign
         id: sign
