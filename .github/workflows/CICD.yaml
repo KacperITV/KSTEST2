@@ -5,11 +5,11 @@ on:
   push:
     paths-ignore:
       - '**.md'
-      - '.github/workflows/*.yaml'
-      - '!.github/workflows/CICD.yaml'
       - 'docs/**'
       - '.vscode/**'
       - 'scripts/**'
+      - '.github/workflows/**'
+      - '!.github/workflows/CICD.yaml'
     branches: [ 'main', 'release/*', 'feature/*' ]
 
 defaults:
@@ -175,7 +175,8 @@ jobs:
 
   Build:
     needs: [ Initialization ]
-    if: (!failure()) && (!cancelled()) && fromJson(needs.Initialization.outputs.buildOrderJson)[0].projectsCount > 0 && (github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[rebuild]') || needs.Initialization.outputs.baselineWorkflowRunId == '0')
+    if: |
+      !failure() && !cancelled() && fromJson(needs.Initialization.outputs.buildOrderJson)[0].projectsCount > 0 && (github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.modified, '**.al') || contains(github.event.head_commit.modified, '**.app') || contains(github.event.head_commit.modified, 'app.json'))
     strategy:
       matrix:
         include: ${{ fromJson(needs.Initialization.outputs.buildOrderJson)[0].buildDimensions }}
