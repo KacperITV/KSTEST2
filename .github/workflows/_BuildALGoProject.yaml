@@ -114,6 +114,7 @@ jobs:
           skippedProjectsJson: ${{ inputs.skippedProjectsJson }}
           project: ${{ inputs.project }}
           baselineWorkflowRunId: ${{ inputs.baselineWorkflowRunId }}
+          forceReuseArtifacts: true
 
       - name: Read secrets
         id: ReadSecrets
@@ -133,22 +134,25 @@ jobs:
           submodules: ${{ env.useGitSubmodules }}
           token: '${{ fromJson(steps.ReadSecrets.outputs.Secrets).gitSubmodulesToken }}'
 
-      - name: Determine ArtifactUrl
-        id: determineArtifactUrl
-        if: steps.DetermineBuildProject.outputs.BuildIt == 'True'
-        uses: microsoft/AL-Go-Actions/DetermineArtifactUrl@v6.4
-        with:
-          shell: ${{ inputs.shell }}
-          project: ${{ inputs.project }}
-
       - name: Cache Business Central Artifacts
-        if: steps.DetermineBuildProject.outputs.BuildIt == 'True' && env.useCompilerFolder == 'True'
-        uses: actions/cache@v4  # Zaktualizuj wersję cache
+        id: cache-bc-artifacts
+        if: steps.DetermineBuildProject.outputs.BuildIt == 'True' && env.useCompilerFolder == 'True' && inputs.useArtifactCache
+        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
         with:
           path: .artifactcache
-          key: ${{ runner.os }}-bc-artifacts-${{ hashFiles('**/*.app') }}
+          key: bc-artifacts-${{ runner.os }}-${{ inputs.project }}-${{ hashFiles(format('{0}/**/app.json', inputs.project)) }}
           restore-keys: |
-            ${{ runner.os }}-bc-artifacts-
+            bc-artifacts-${{ runner.os }}-${{ inputs.project }}-
+
+      - name: Cache Diagnostic
+        if: steps.DetermineBuildProject.outputs.BuildIt == 'True' && env.useCompilerFolder == 'True' && inputs.useArtifactCache
+        run: |
+          if (Test-Path -Path .artifactcache) {
+          Write-Host "Cache został skutecznie wykorzystany!"
+          Get-ChildItem -Path .artifactcache -Recurse | Measure-Object -Property Length -Sum
+          } else {
+          Write-Host "Cache nie został odnaleziony lub wykorzystany."
+          }
 
       - name: Download Project Dependencies
         id: DownloadProjectDependencies
