@@ -173,7 +173,7 @@ jobs:
 
   Build:
     needs: [ Initialization ]
-    if: (!failure()) && (!cancelled()) && fromJson(needs.Initialization.outputs.buildOrderJson)[0].projectsCount > 0
+    if: (!failure()) && (!cancelled()) && fromJson(needs.Initialization.outputs.buildOrderJson)[0].projectsCount > 0 && (github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[rebuild]') || needs.Initialization.outputs.baselineWorkflowRunId == '0')
     strategy:
       matrix:
         include: ${{ fromJson(needs.Initialization.outputs.buildOrderJson)[0].buildDimensions }}
