@@ -7,7 +7,9 @@ on:
       - '**.md'
       - '.github/workflows/*.yaml'
       - '!.github/workflows/CICD.yaml'
-      - '**/*.json'  # Dodaj to, jeśli zmiany w plikach JSON nie powinny wymuszać pełnego buildu
+      - 'docs/**'
+      - '.vscode/**'
+      - 'scripts/**'
     branches: [ 'main', 'release/*', 'feature/*' ]
 
 defaults:
