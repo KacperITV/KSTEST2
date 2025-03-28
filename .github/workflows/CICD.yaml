@@ -174,29 +174,29 @@ jobs:
           downloadLatest: true
 
   Build:
-    needs: [ Initialization ]
-    if: |
-      !failure() && !cancelled() && fromJson(needs.Initialization.outputs.buildOrderJson)[0].projectsCount > 0 && (github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.modified, '**.al') || contains(github.event.head_commit.modified, '**.app') || contains(github.event.head_commit.modified, 'app.json'))
-    strategy:
-      matrix:
-        include: ${{ fromJson(needs.Initialization.outputs.buildOrderJson)[0].buildDimensions }}
-      fail-fast: false
-    name: Build ${{ matrix.projectName }} (${{ matrix.buildMode }})
-    uses: ./.github/workflows/_BuildALGoProject.yaml
-    secrets: inherit
-    with:
-      shell: ${{ matrix.githubRunnerShell }}
-      runsOn: ${{ matrix.githubRunner }}
-      project: ${{ matrix.project }}
-      projectName: ${{ matrix.projectName }}
-      buildMode: ${{ matrix.buildMode }}
-      skippedProjectsJson: ${{ needs.Initialization.outputs.skippedProjects }}
-      projectDependenciesJson: ${{ needs.Initialization.outputs.projectDependenciesJson }}
-      baselineWorkflowRunId: ${{ needs.Initialization.outputs.baselineWorkflowRunId }}
-      baselineWorkflowSHA: ${{ needs.Initialization.outputs.baselineWorkflowSHA }}
-      secrets: 'licenseFileUrl,codeSignCertificateUrl,*codeSignCertificatePassword,keyVaultCertificateUrl,*keyVaultCertificatePassword,keyVaultClientId,gitHubPackagesContext,applicationInsightsConnectionString'
-      signArtifacts: true
-      useArtifactCache: true
+      needs: [ Initialization ]
+      if: (!failure()) && (!cancelled()) && fromJson(needs.Initialization.outputs.buildOrderJson)[0].projectsCount > 0
+      strategy:
+        matrix:
+          include: ${{ fromJson(needs.Initialization.outputs.buildOrderJson)[0].buildDimensions }}
+        fail-fast: false
+      name: Build ${{ matrix.projectName }} (${{ matrix.buildMode }})
+      uses: ./.github/workflows/_BuildALGoProject.yaml
+      secrets: inherit
+      with:
+        shell: ${{ matrix.githubRunnerShell }}
+        runsOn: ${{ matrix.githubRunner }}
+        project: ${{ matrix.project }}
+        projectName: ${{ matrix.projectName }}
+        buildMode: ${{ matrix.buildMode }}
+        skippedProjectsJson: ${{ needs.Initialization.outputs.skippedProjects }}
+        projectDependenciesJson: ${{ needs.Initialization.outputs.projectDependenciesJson }}
+        baselineWorkflowRunId: ${{ needs.Initialization.outputs.baselineWorkflowRunId }}
+        baselineWorkflowSHA: ${{ needs.Initialization.outputs.baselineWorkflowSHA }}
+        secrets: 'licenseFileUrl,codeSignCertificateUrl,*codeSignCertificatePassword,keyVaultCertificateUrl,*keyVaultCertificatePassword,keyVaultClientId,gitHubPackagesContext,applicationInsightsConnectionString'
+        signArtifacts: true
+        useArtifactCache: true
+        incrementalBuild: true
 
   BuildPP:
     needs: [ Initialization ]
