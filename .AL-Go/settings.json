@@ -12,4 +12,8 @@
     "TestNewPLF"
   ],
   "RepoVersion": "2.0"
+  {
+  "useCompilerFolder": true,
+  "useArtifactCache": true
+}
 }
