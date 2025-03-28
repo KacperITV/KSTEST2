@@ -6,7 +6,7 @@ pageextension 50123 CustomerListExt extends "Customer List"
 {
     trigger OnOpenPage();
     begin
-        Message('test 321 123 321');
+        Message('KS TEST');
     end;
 }
 
